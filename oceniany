@@ -1,0 +1,124 @@
+using System;
+
+namespace ASD
+{
+    public class Lab14 : MarshalByRefObject
+    {
+        /// <summary>Etap I</summary>
+        /// <param name="text">Wejściowy ciąg znaków</param>
+        /// <param name="pattern">Wzorzec do wyszukania najdłuższego pokrytego podsłowa ciągu `text` przez niego.</param>
+        /// <param name="result">Najdłuższe podsłowo `text` pokryte przez `pattern`.</param>
+        /// <returns>Długość najdłuższego podsłowa `text` pokrytego przez `pattern`.</returns>
+        public int Stage1(string text, string pattern, out string result)
+        {
+            int x = pattern.Length;
+            int y = text.Length;
+
+            int bestMax = 0;
+            int bestStart = -1;
+
+            int currentMax = 0;
+            int currentStart = -1;
+
+            bool f = false;
+
+
+            string combined = pattern + "#" + text;
+            int[] P = Compute(combined);
+
+
+            for (int i = pattern.Length; i < combined.Length+1; i++)
+            {
+                if (P[i] >= x)
+                {
+                    f = true;
+
+                    if (currentMax + currentStart >= i - P[i])
+                    {
+                        currentMax = i - currentStart;
+                        if (currentMax > bestMax)
+                        {
+                            bestMax = currentMax;
+                            bestStart = currentStart;
+                        }
+                    }
+                    else
+                    {
+                        currentMax = P[i];
+                        currentStart = i - P[i];
+
+                        if (currentMax > bestMax)
+                        {
+                            bestMax = currentMax;
+                            bestStart = currentStart;
+                        }
+                    }
+                }
+            }
+
+            if (f == false)
+            {
+                result = "";
+                return 0;
+            }
+
+            result = combined.Substring(bestStart, bestMax);
+
+            return bestMax;
+
+            result = null;
+            return -1;
+        }
+
+        /// <summary>Etap II</summary>
+        /// <param name="word">Wejściowe słowo.</param>
+        /// <param name="result">Najkrótsze podsłowo pokrywające `word`.</param>
+        /// <returns>Długość najkrótszego podsłowa pokrywającego `word`.</returns>
+        public int Stage2(string word, out string result)
+        {
+            int x = word.Length;
+            for (int i = 1; i < word.Length; i++)
+            {
+                string pattern = word.Substring(0, i);
+                if (Stage1(word, pattern, out result)==x)
+                {
+                    result = pattern;
+                    return i;
+                }
+            }
+            
+            result = word;
+            return x;
+            
+            
+            result = null;
+            return -1;
+        }
+
+
+        static private int[] Compute(string s)
+        {
+            int n = s.Length + 1;
+            int[] P = new int [n];
+            P[0] = 0;
+            P[1] = 0;
+            int t = 0;
+            for (int j = 2; j < n; j++)
+            {
+                while (t > 0 && s[t] != s[j - 1])
+                {
+                    t = P[t];
+                }
+
+                if (s[t] == s[j - 1])
+                {
+                    t++;
+                }
+
+                P[j] = t;
+            }
+
+            return P;
+        }
+    }
+}
